@@ -36,9 +36,9 @@ get-clip(){
 }
 
 grab(){
-    if w3m "$1"
+    if ! w3m "$1"
     then
-        echo "error loading page" 1>&2
+        echo "w3m failed with a non 0 exit status" 1>&2
     fi
 }
 
@@ -62,8 +62,18 @@ shift $((OPTIND-1))
 
 if test -n "$grab_flag"
 then
-    content="$(grab clip)"
-    echo "$content" | gtts-cli -f- | mpv -
+    if echo "$clip" | grep -q "^http"
+    then
+        content="$(grab "$clip")"
+        if [ -n "$content" ]
+        then
+            echo "$content" | gtts-cli -f- | mpv -
+        else
+            echo "Couldn't grab page content"
+        fi
+    else
+        echo "$clip is not a valid URL"
+    fi
 else
     echo "$clip" | gtts-cli -f- | mpv -
 fi
