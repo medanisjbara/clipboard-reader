@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+help(){
+    name="$(basename "$0")"
+    echo "$name: $name [-h]"
+    echo "  Reads your clipboard aloud"
+}
+
 get-clip(){
     if test -n "$WAYLAND_DISPLAY"
     then
@@ -25,4 +31,17 @@ get-clip(){
     fi
 }
 
-clip | gtts-cli -f- | mpv -
+while getopts ":h" o; do
+    case "${o}" in
+        h)
+            help
+            exit
+            ;;
+        *)
+            echo "Unknown option"
+            exit 1
+            ;;
+    esac
+done
+shift $((OPTIND-1))
+get-clip | gtts-cli -f- | mpv -
