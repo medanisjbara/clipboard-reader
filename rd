@@ -18,6 +18,9 @@ then
     echo "xclip is not installed on Xorg session"
     exit 1
   fi
+elif command -v termux-clipboard-get &>/dev/null
+then
+    clip="$(termux-clipboard-get)"
 fi
 
 echo "$clip" | gtts-cli -f- | mpv -
