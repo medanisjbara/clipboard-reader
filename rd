@@ -49,7 +49,7 @@ gtts(){
     else
         gtts-cli "$@"
     fi
-}
+} 
 
 clip="$(get-clip)"
 while getopts "hgl:" o; do
@@ -77,15 +77,15 @@ then
     if echo "$clip" | grep -q "^http"
     then
         content="$(grab "$clip")"
-        if [ -n "$content" ]
+        if [ -z "$content" ]
         then
-            echo "$content" | gtts -f- | mpv -
-        else
             echo "Couldn't grab page content"
         fi
     else
         echo "$clip is not a valid URL"
     fi
 else
-    echo "$clip" | gtts -f- | mpv -
+    content="$clip"
 fi
+
+echo "$content" | gtts -f- | mpv -
