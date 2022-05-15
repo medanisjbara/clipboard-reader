@@ -8,7 +8,7 @@ help(){
     echo "      -h      Show this help message"
     echo "      -g      If the content of the clipboard is a URL, the script will"
     echo "              grab and read the associated output"
-    echo "      -l      language to use for gtts, the specified value can be en, fr .."
+    echo "      -l      language to use, example: en, fr .."
 }
 
 get-clip(){
@@ -43,6 +43,14 @@ grab(){
     fi
 }
 
+gtts(){
+    if test -z "$lang"; then
+        gtts-cli -l "$lang" "$@"
+    else
+        gtts-cli "$@"
+    fi
+}
+
 clip="$(get-clip)"
 while getopts "hgl:" o; do
     case "${o}" in
@@ -63,17 +71,6 @@ while getopts "hgl:" o; do
     esac
 done
 shift $((OPTIND-1))
-
-if test -z "$lang"
-then
-    gtts(){
-        gtts-cli "$@"
-    }
-else
-    gtts(){
-        gtts-cli -l "$lang" "$@"
-    }
-fi
 
 if test -n "$grab_flag"
 then
