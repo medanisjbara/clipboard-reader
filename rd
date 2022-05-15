@@ -9,6 +9,7 @@ help(){
     echo "      -g      If the content of the clipboard is a URL, the script will"
     echo "              grab and read the associated output"
     echo "      -l      language to use, example: en, fr .."
+    echo "      -e      edit what's being read before reading it"
 }
 
 get-clip(){
@@ -44,7 +45,7 @@ grab(){
 }
 
 gtts(){
-    if test -z "$lang"; then
+    if test -n "$lang"; then
         gtts-cli -l "$lang" "$@"
     else
         gtts-cli "$@"
@@ -52,7 +53,7 @@ gtts(){
 } 
 
 clip="$(get-clip)"
-while getopts "hgl:" o; do
+while getopts "hgl:e" o; do
     case "${o}" in
         h)
             help
@@ -63,6 +64,9 @@ while getopts "hgl:" o; do
             ;;
         l)
             lang="$OPTARG"
+            ;;
+        e)
+            edit_flag=true
             ;;
         *)
             echo "An error occured" 1>&2
@@ -86,6 +90,17 @@ then
     fi
 else
     content="$clip"
+fi
+
+if test -n "$edit_flag"
+then
+    if command -v vipe
+    then
+        edited="$(echo "$content" | vipe)"
+        content="$edited"
+    else
+        echo "vipe is not installed, Cannot edit"
+    fi
 fi
 
 echo "$content" | gtts -f- | mpv -
