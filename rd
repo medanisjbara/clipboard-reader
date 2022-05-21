@@ -40,9 +40,15 @@ get-clip(){
 }
 
 grab(){
-    if ! w3m "$1"
+    if command -v w3m &>/dev/null
     then
-        echo "w3m failed with a non 0 exit status" 1>&2
+        if ! w3m "$1"
+        then
+            echo "w3m failed with a non 0 exit status" 1>&2
+        fi
+    else
+        curl "$1" > /tmp/temporary.html
+        less /tmp/temporary.html
     fi
 }
 
