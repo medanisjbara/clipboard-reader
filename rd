@@ -94,7 +94,7 @@ fi
 
 if test -n "$edit_flag"
 then
-    if command -v vipe
+    if command -v vipe &>/dev/null
     then
         edited="$(echo "$content" | vipe)"
         content="$edited"
