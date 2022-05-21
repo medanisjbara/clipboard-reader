@@ -10,6 +10,8 @@ help(){
     echo "              grab and read the associated output"
     echo "      -l      language to use, example: en, fr .."
     echo "      -e      edit what's being read before reading it"
+    echo "      -u      unicode characters only, and remove \\xa0"
+    echo "              use this if you're experiencing errors"
 }
 
 get-clip(){
@@ -53,7 +55,7 @@ gtts(){
 } 
 
 clip="$(get-clip)"
-while getopts "hgl:e" o; do
+while getopts "hgl:eu" o; do
     case "${o}" in
         h)
             help
@@ -67,6 +69,9 @@ while getopts "hgl:e" o; do
             ;;
         e)
             edit_flag=true
+            ;;
+        u)
+            utf8_flag=true
             ;;
         *)
             echo "An error occured" 1>&2
@@ -90,6 +95,20 @@ then
     fi
 else
     content="$clip"
+fi
+
+if test -n "$utf8_flag"
+then
+    if ! command -v bbe &>/dev/null
+    then
+        echo "bbe is not installed, please install it to do binary replacement properly"
+        echo "attempting to rely only on charset conversion, this might not be optimal"
+        bbe(){
+            cat
+        }
+    fi
+    cleaned="$(echo "$content" | bbe -e 's/\xa0//g')"
+    content="$(echo "$cleaned" | iconv -f utf-8 -t utf-8 -c -)"
 fi
 
 if test -n "$edit_flag"
