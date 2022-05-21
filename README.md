@@ -3,10 +3,15 @@
 A simple script that reads aloud your clipboard
 ## Dependencies
 The dependency list is constantly changing, and since I am personally a fan of "Working with what I have" I am trying to make my script more and more undependent from any dependencies.  
+
 In other words, I would like to make it use some sort of a fallback mechanism if something is not available. If `w3m` isn't installed, the script will use `curl` and `less` to get the content of the page.  
+
 And so on and so forth. This makes it easy for someone who just wants to copy the script and just starts using it, as well as for people who wants to use it to it's full potential by integrating it with keyboard shortcuts on their WM or DE. (I personally think it gives a good boost to productivity).  
+
 I am mainly doing this as a challange for myself (someone who is learning how to do bash scripting).  
+
 With that said, This makes it hard for me to layout dependencies the right way, since there are some which are nessesairy, some which are optional, and some which can be replaced with other dependencies that serves the same functionality.  
+
 ### Required dependencies
 *So to use the script you need to have at least one package in each of the following categories installed and working:*
 #### Text to speech engine
