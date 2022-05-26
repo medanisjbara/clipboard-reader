@@ -28,7 +28,7 @@ get-clip(){
     then
       if command -v xclip &>/dev/null
       then
-        xclip -o
+        xclip -o -selection c
       else
         echo "xclip is not installed on Xorg session" 1>&2
         exit 1
