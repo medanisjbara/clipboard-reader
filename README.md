@@ -43,4 +43,22 @@ cd clipboard-reader
 sudo install rd /usr/local/bin
 ```
 ## Usage
-Use `rd -h` to get help. Or just copy a paragraph and execute the script.
+Use `rd -h` to get the following help for all the options.
+```
+rd: rd [-h] [-g] [-l lang]
+  Reads your clipboard aloud
+  OPTIONS
+      -h      Show this help message
+      -g      If the content of the clipboard is a URL, the script will
+              grab and read the associated output
+      -l      language to use, example: en, fr ..
+      -e      edit what's being read before reading it
+      -u      unicode characters only, and remove \xa0
+              use this if you're experiencing errors
+```
+To start using the script, just copy a paragraph and execute the script. It will grab whatever is on your clipboard and read it aloud. Other options might include.
+* `-u` to fix issues that gTTS might have with some characters.
+* `-l` if what you're reading is not english (this gets passed as it is to gTTS)
+* `-e` to edit before reading (requires `vipe`)
+* `-g` to grab the content of a URL, this is useful when you're reading a webpage (just copy the url and execute the script)
+* `-h` if you forget any of the above.
