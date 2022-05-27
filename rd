@@ -36,6 +36,8 @@ get-clip(){
     elif command -v termux-clipboard-get &>/dev/null
     then
         termux-clipboard-get
+    else
+        cat
     fi
 }
 
