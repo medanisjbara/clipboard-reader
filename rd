@@ -37,7 +37,14 @@ get-clip(){
     then
         termux-clipboard-get
     else
-        cat
+        if test -n "$grab_flag"
+        then
+            echo -n "Link: " >&2
+            read -r url
+            echo "$url"
+        else
+            cat
+        fi
     fi
 }
 
