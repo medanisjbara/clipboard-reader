@@ -69,7 +69,6 @@ gtts(){
     fi
 } 
 
-clip="$(get-clip)"
 while getopts "hgl:eu" o; do
     case "${o}" in
         h)
@@ -95,6 +94,8 @@ while getopts "hgl:eu" o; do
     esac
 done
 shift $((OPTIND-1))
+
+clip="$(get-clip)"
 
 if test -n "$grab_flag"
 then
