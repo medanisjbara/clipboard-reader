@@ -29,6 +29,9 @@ pip install gtts
 #### Pager (for web pages conversion to plain text)
 *To be able to use the `-g` option which allows you to read a page by just copying it's url.*
 * [w3m](https://github.com/tats/w3m)
+* `curl` can be a replacement for `w3m` with `less` being the pager in this case
+#### Epub Reader
+* `epub2txt` is the package that you need if you'd like to read `*.epub` files directly using `-f`
 #### Editor
 *if you want to use the `-e` option to edit before reading.*
 * [vipe](https://linux.die.net/man/1/vipe) is for now the implementation that I am using. It is part of `moreutils` which is available on all distros (as far as I know).
@@ -53,6 +56,7 @@ rd: rd [-h] [-g] [-l lang]
               grab and read the associated output
       -l      language to use, example: en, fr ..
       -e      edit what's being read before reading it
+      -f      file to read or stdin if "-" is provided
       -u      unicode characters only, and remove \xa0
               use this if you're experiencing errors
 ```
@@ -61,4 +65,5 @@ To start using the script, just copy a paragraph and execute the script. It will
 * `-l` if what you're reading is not english (this gets passed as it is to gTTS)
 * `-e` to edit before reading (requires `vipe`)
 * `-g` to grab the content of a URL, this is useful when you're reading a webpage (just copy the url and execute the script)
-* `-h` if you forget any of the above.
+* `-f` if you would like to read from a file. This includes any type that `less` can read (`*.txt`, `*.pdf`, etc) and additional ones such as `*.epub` for example.
+* `-h` if you forget any of the above. Read the help.
