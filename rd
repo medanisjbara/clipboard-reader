@@ -130,6 +130,13 @@ while getopts "hgl:ef:u" o; do
 done
 shift $((OPTIND-1))
 
+if ! command -v gtts-cli &>/dev/null
+then
+	echo "gtts is not installed or gtts-cli is not in your PATH."
+	echo "Please install it using 'pip install gtts' and make sure it's accessible in your PATH"
+	exit
+fi
+
 clip="$(get-clip)"
 
 if test -n "$grab_flag"
