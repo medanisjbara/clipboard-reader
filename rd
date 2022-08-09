@@ -87,8 +87,8 @@ grab(){
             echo "w3m failed with a non 0 exit status" 1>&2
         fi
     else
-        curl "$1" > /tmp/temporary.html
-        less /tmp/temporary.html
+        curl "$1" > "$PREFIX"/tmp/temporary.html
+        less "$PREFIX"/tmp/temporary.html
     fi
 }
 
