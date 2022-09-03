@@ -1,183 +1,87 @@
 #!/usr/bin/env bash
 
+cfg_file="$HOME/.config/$0.config"
+
 help(){
-    name="$(basename "$0")"
-    echo "$name: $name [-h] [-g] [-l lang]"
-    echo "  Reads your clipboard aloud"
-    echo "  OPTIONS"
-    echo "      -h      Show this help message"
-    echo "      -g      If the content of the clipboard is a URL, the script will"
-    echo "              grab and read the associated output"
-    echo "      -l      language to use, example: en, fr .."
-    echo "      -e      edit what's being read before reading it"
-    echo "      -f      file to read or stdin if \"-\" is provided"
-    echo "      -u      unicode characters only, and remove \\xa0"
-    echo "              use this if you're experiencing errors"
+  name="$(basename "$0")"
+  echo "$name"
+  echo "  Reads your clipboard aloud"
+}
+# Functions needed for gen_config
+## Outputs the first existing command from the commands given as arguments
+get_from(){
+  for cmd in "$@"; do
+    if command -v "$(echo "$cmd"|cut -d ' ' -f 1)" &>/dev/null; then
+      echo "$cmd"
+      break
+    fi 
+  done; unset cmd
 }
 
-get-clip(){
-    if test -n "$file_flag"
-    then
-        if [ "$target_file" = "-" ]
-        then
-            get-stdin
-        else
-            handle "$target_file"
-        fi
-    elif test -n "$WAYLAND_DISPLAY"
-    then
-      if command -v wl-paste &>/dev/null
-      then
-        wl-paste
-      else
-        echo "wl-clipboard is not installed on wayland session" 1>&2
-        exit 1
-      fi
-    elif test -n "$DISPLAY"
-    then
-      if command -v xclip &>/dev/null
-      then
-        xclip -o -selection c
-      else
-        echo "xclip is not installed on Xorg session" 1>&2
-        exit 1
-      fi
-    elif command -v termux-clipboard-get &>/dev/null
-    then
-        termux-clipboard-get
-    else
-        get-stdin
+# Outputs the command given as third argument if the two variables $1 and $2 are non zero strings
+get_if(){
+  if [ -n "$1" ]; then
+    echo "$1"
+  elif [ -n "$2" ]; then
+    if command -v "$(echo "$3"|cut -d ' ' -f 1)" &>/dev/null; then
+      echo "$3"
     fi
+  fi
 }
 
-get-stdin(){
-    if test -n "$grab_flag"
-    then
-        echo -n "Link: " >&2
-        read -r url
-        echo "$url"
-    else
-        cat
+# Generates configuration
+gen_config(){
+  # Text to speech engine
+  conf_tts="$(get_from 'gtts-cli -f-' 'espeak-ng --stdout' 'espeak --stdout')"
+
+  # Clipboad grabber
+  conf_clip_cmd="$(get_if "$conf_clip_cmd" "$WAYLAND_DISPLAY" "wl-paste")"
+  conf_clip_cmd="$(get_if "$conf_clip_cmd" "$DISPLAY" "xclip -o -selection c")"
+  conf_clip_cmd="$(get_if "$conf_clip_cmd" "$TERMUX_VERSION" "termux-clipboard-get")"
+  test -z "$conf_clip_cmd" && conf_clip_cmd=stdin_grab
+
+  # Player
+  conf_player="$(get_from 'mpv -')"
+
+  # Running a check
+  for conf in tts player; do
+    if test -z "$(eval "echo \$conf_$conf")"; then
+      echo "Seems like $conf is not set. Please install an appropriate command."
+      echo "If you believe you have an appropriate command but $(basename "$0") is not"
+      echo "detecting it please open an issue"
+      echo
     fi
+  done; unset conf
+  export conf_tts conf_clip_cmd conf_player
 }
 
-handle(){
-    if [[ "$1" = *.epub ]]
-    then
-        if command -v epub2txt >&/dev/null
-        then
-            epub2txt "$1"
-        else
-            echo "epub2txt is not installed, cannot extract text" 1>&2
-        fi
-    elif [[ "$1" = *.pdf ]]
-    then
-        less "$1"
-    else
-        echo "Can't recognize file format, press \"n\" if the player doesn't start automatically" 1>&2
-        less "$1"
-    fi
+# Gets the input from from stdin
+stdin_grab(){
+  if [ -n "$grab_flag" ]; then
+    read -rp link:\  link; echo "$link"
+  else
+    cat
+  fi
 }
 
-grab(){
-    if command -v w3m &>/dev/null
-    then
-        if ! w3m "$1"
-        then
-            echo "w3m failed with a non 0 exit status" 1>&2
-        fi
-    else
-        curl "$1" > "$PREFIX"/tmp/temporary.html
-        less "$PREFIX"/tmp/temporary.html
-    fi
-}
-
-gtts(){
-    if test -n "$lang"; then
-        gtts-cli -l "$lang" "$@"
-    else
-        gtts-cli "$@"
-    fi
-} 
-
-while getopts "hgl:ef:u" o; do
-    case "${o}" in
-        h)
-            help
-            exit
-            ;;
-        g)
-            grab_flag=true
-            ;;
-        l)
-            lang="$OPTARG"
-            ;;
-        e)
-            edit_flag=true
-            ;;
-        f)
-            file_flag=true
-            target_file="$OPTARG"
-            ;;
-        u)
-            utf8_flag=true
-            ;;
-        *)
-            echo "An error occured" 1>&2
-            exit 1
-            ;;
-    esac
-done
-shift $((OPTIND-1))
-
-if ! command -v gtts-cli &>/dev/null
-then
-	echo "gtts is not installed or gtts-cli is not in your PATH."
-	echo "Please install it using 'pip install gtts' and make sure it's accessible in your PATH"
-	exit
-fi
-
-clip="$(get-clip)"
-
-if test -n "$grab_flag"
-then
-    if echo "$clip" | grep -q "^http"
-    then
-        content="$(grab "$clip")"
-        if [ -z "$content" ]
-        then
-            echo "Couldn't grab page content" 1>&2
-        fi
-    else
-        echo "$clip is not a valid URL" 1>&2
-    fi
+# The actual script
+if [ -f "$cfg_file" ]; then
+  # shellcheck source=/dev/null
+  . "$cfg_file"
 else
-    content="$clip"
+  gen_config
 fi
 
-if test -n "$utf8_flag"
-then
-    if ! command -v bbe &>/dev/null
-    then
-        echo "bbe is not installed, please install it to do binary replacement properly" 1>&2
-        echo "attempting to rely only on charset conversion, this might not be optimal" 1>&2
-        bbe(){
-            cat
-        }
-    fi
-    cleaned="$(echo "$content" | bbe -e 's/\xa0//g')"
-    content="$(echo "$cleaned" | iconv -f utf-8 -t utf-8 -c -)"
-fi
 
-if test -n "$edit_flag"
-then
-    if command -v vipe &>/dev/null
-    then
-        edited="$(echo "$content" | vipe)"
-        content="$edited"
-    else
-        echo "vipe is not installed, Cannot edit" 1>&2
-    fi
-fi
+for conf in clip_cmd tts player; do
+  if [ -z  "$(eval "echo \$$conf")" ];then
+    eval "$conf='$(eval "echo \$conf_$conf")'"
+    if [ -z "$(eval "echo \$$conf")" ]; then
+      echo "Cannot find $conf."
+      echo "check $0 -h"
+    fi 
+  fi
+done
 
-echo "$content" | gtts -f- | mpv -
+# Feed clipboard content to a text to speech engine and feed its output to the prefered player
+$clip_cmd | $tts | $player

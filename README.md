@@ -1,6 +1,11 @@
 # Clipboard Reader
 ## Description
 A simple script that reads aloud your clipboard
+
+As of 4 September 2022. The script is being rewritten in a more modular way allowing it to better support more features like wider fallback support, a config file and a way to overwrite it via env variables and flag arguments.
+
+This is better in the long run, but for now it causes a loss of funcitonality. You can use the script in the `deprecated` branch which can read a couple of file extentions encluding pdf and epub. as well as all the functions mentioned in the help menu.
+
 ## Dependencies
 The dependency list is constantly changing, and since I am personally a fan of "Working with what I have" I am trying to make my script more and more undependent from any dependencies.  
 
