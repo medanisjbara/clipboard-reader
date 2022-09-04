@@ -35,16 +35,16 @@ gen_config(){
   conf_tts="$(get_from 'gtts-cli -f-' 'espeak-ng --stdout' 'espeak --stdout')"
 
   # Clipboad grabber
+  conf_clip_cmd="$(get_if "$conf_clip_cmd" "$use_stdin" stdin_grab")"
   conf_clip_cmd="$(get_if "$conf_clip_cmd" "$WAYLAND_DISPLAY" "wl-paste")"
   conf_clip_cmd="$(get_if "$conf_clip_cmd" "$DISPLAY" "xclip -o -selection c")"
   conf_clip_cmd="$(get_if "$conf_clip_cmd" "$TERMUX_VERSION" "termux-clipboard-get")"
-  test -z "$conf_clip_cmd" && conf_clip_cmd=stdin_grab
 
   # Player
   conf_player="$(get_from 'mpv -')"
 
   # Running a check
-  for conf in tts player; do
+  for conf in tts clip_cmd player; do
     if test -z "$(eval "echo \$conf_$conf")"; then
       echo "Seems like $conf is not set. Please install an appropriate command."
       echo "If you believe you have an appropriate command but $(basename "$0") is not"
