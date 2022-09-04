@@ -6,6 +6,8 @@ help(){
   name="$(basename "$0")"
   echo "$name"
   echo "  Reads your clipboard aloud"
+  echo "  Options:"
+  echo "    -h    show this help message"
 }
 # Functions needed for gen_config
 ## Outputs the first existing command from the commands given as arguments
@@ -65,23 +67,42 @@ stdin_grab(){
 }
 
 # The actual script
-if [ -f "$cfg_file" ]; then
-  # shellcheck source=/dev/null
-  . "$cfg_file"
-else
-  gen_config
-fi
-
-
-for conf in clip_cmd tts player; do
-  if [ -z  "$(eval "echo \$$conf")" ];then
-    eval "$conf='$(eval "echo \$conf_$conf")'"
-    if [ -z "$(eval "echo \$$conf")" ]; then
-      echo "Cannot find $conf."
-      echo "check $0 -h"
-    fi 
+main(){
+  if [ -f "$cfg_file" ]; then
+    # shellcheck source=/dev/null
+    . "$cfg_file"
+  else
+    gen_config
   fi
-done
 
-# Feed clipboard content to a text to speech engine and feed its output to the prefered player
-$clip_cmd | $tts | $player
+
+  for conf in clip_cmd tts player; do
+    if [ -z  "$(eval "echo \$$conf")" ];then
+      eval "$conf='$(eval "echo \$conf_$conf")'"
+      if [ -z "$(eval "echo \$$conf")" ]; then
+        echo "Cannot find $conf."
+        echo "check $0 -h"
+      fi
+    fi
+  done
+
+  # Feed clipboard content to a text to speech engine and feed its output to the prefered player
+  $clip_cmd | $tts | $player
+ }
+
+
+while getopts "h" o; do
+    case "${o}" in
+        h)
+            help
+            exit
+            ;;
+        *)
+            echo "An error occured" 1>&2
+            exit 1
+            ;;
+    esac
+done
+shift $((OPTIND-1))
+
+main
